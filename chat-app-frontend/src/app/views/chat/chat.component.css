@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  height: 85%;
+  width: 100%;
+}
+
+active-users {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+}
+
+messages {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+}

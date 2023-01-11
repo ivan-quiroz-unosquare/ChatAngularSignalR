@@ -1,0 +1,29 @@
+.users {
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.user-list-item {
+  display: flex;
+  align-items: center;
+}
+
+.status-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 100%;
+  background-color: green;
+  margin-right: 0.5rem;
+}
+
+.active-users-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+}
+
+h1 {
+  margin: 0;
+}
