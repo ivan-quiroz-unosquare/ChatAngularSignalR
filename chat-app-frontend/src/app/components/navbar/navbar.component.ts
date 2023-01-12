@@ -17,7 +17,7 @@ import { Component, OnInit } from '@angular/core';
       <div *ngIf="loggedIn" class="navbar-actions">
         <div class="user-info">
           <mat-icon>account_circle</mat-icon>
-          <span class="navbar-item username">ivan.quiroz@unosquare.com</span>
+          <span class="navbar-item username">test_user@email.com</span>
         </div>
         <button
           mat-raised-button

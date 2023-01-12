@@ -65,10 +65,10 @@ export class ChatComponent implements OnInit {
 
   constructor() {
     this.activeUsers = [
-      { email: 'ivan.quiroz@unosquare.com', userName: 'ivan.quiroz' },
-      { email: 'ivan.quiroz@unosquare.com', userName: 'ivan.quiroz' },
-      { email: 'ivan.quiroz@unosquare.com', userName: 'ivan.quiroz' },
-      { email: 'ivan.quiroz@unosquare.com', userName: 'ivan.quiroz' },
+      { email: 'test_user1@email.com', userName: 'test_user1' },
+      { email: 'test_user2@email.com', userName: 'test_user2' },
+      { email: 'test_user3@email.com', userName: 'test_user3' },
+      { email: 'test_user4@email.com', userName: 'test_user4' },
     ];
     // this.connection = new HubConnectionBuilder()
     //   .withUrl('http://localhost:7001')
