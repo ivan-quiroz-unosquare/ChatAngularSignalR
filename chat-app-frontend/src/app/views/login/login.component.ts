@@ -1,5 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AccountService } from 'src/app/services/account.service';
+import jwt_decode from 'jwt-decode';
+import { AuthenticationResponse } from 'src/app/models/AuthenticationResponse';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'login',
@@ -25,6 +29,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
               [type]="hidePassword ? 'password' : 'text'"
             />
             <button
+              type="button"
               mat-icon-button
               matSuffix
               (click)="hidePassword = !hidePassword"
@@ -43,6 +48,12 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
             mat-raised-button
             color="primary"
             [disabled]="form.invalid"
+            (click)="
+              login(
+                form.controls['userName'].value,
+                form.controls['password'].value
+              )
+            "
           >
             Login
           </button>
@@ -51,11 +62,14 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
     </div>
   `,
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   form: FormGroup;
   hidePassword: boolean;
 
-  constructor() {
+  constructor(
+    private _accountService: AccountService,
+    private _router: Router
+  ) {
     this.hidePassword = true;
 
     this.form = new FormGroup({
@@ -64,5 +78,16 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  login(username: string, password: string) {
+    this._accountService.login(btoa(`${username}:${password}`)).subscribe(
+      (response: AuthenticationResponse) => {
+        const userInfo = jwt_decode(response.token);
+        localStorage.setItem('user_info', JSON.stringify(userInfo));
+        this._router.navigateByUrl('/');
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
 }

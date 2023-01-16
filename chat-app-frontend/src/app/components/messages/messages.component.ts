@@ -21,6 +21,7 @@ import { Message } from 'src/app/models/Message';
               'message-send-container': user == message.userName
             }"
           >
+            <p *ngIf="user != message.userName">{{ message.userName + ':' }}</p>
             <li
               [ngClass]="{
                 'message-received': user != message.userName,
@@ -77,7 +78,7 @@ export class MessagesComponent implements OnInit {
       const message: Message = {
         userName: this.user,
         content,
-        date: Date.now(),
+        date: new Date().toJSON(),
       };
       this.messageSend.emit(message);
       this.form.controls['message'].setValue('');

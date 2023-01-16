@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { User } from 'src/app/models/User';
+import { AccountService } from 'src/app/services/account.service';
 
 @Component({
   selector: 'navbar',
@@ -17,7 +20,7 @@ import { Component, OnInit } from '@angular/core';
       <div *ngIf="loggedIn" class="navbar-actions">
         <div class="user-info">
           <mat-icon>account_circle</mat-icon>
-          <span class="navbar-item username">test_user@email.com</span>
+          <span class="navbar-item username">{{ user.userName }}</span>
         </div>
         <button
           mat-raised-button
@@ -48,14 +51,47 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NavbarComponent implements OnInit {
   loggedIn: boolean;
+  user: User;
 
-  constructor() {
-    this.loggedIn = true;
+  constructor(
+    private _router: Router,
+    private _accountService: AccountService
+  ) {
+    this.loggedIn = this.isLoggedIn();
+    this.user = this.getUserInfo();
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    setInterval(() => {
+      this.loggedIn = this.isLoggedIn();
+    }, 300);
+  }
 
   logout() {
-    this.loggedIn = false;
+    this._accountService.logout(this.user.userName).subscribe(
+      (response) => {
+        this.loggedIn = false;
+        localStorage.removeItem('user_info');
+        this._router.navigateByUrl('/login');
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
+  isLoggedIn(): boolean {
+    const hasSession = localStorage.getItem('user_info');
+    if (hasSession) return true;
+    return false;
+  }
+
+  getUserInfo(): User {
+    if (this.isLoggedIn()) {
+      const userInfo = JSON.parse(localStorage.getItem('user_info')!);
+      return { email: userInfo.email, userName: userInfo.username };
+    }
+
+    return { email: '', userName: '' };
   }
 }

@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { RegisterUser } from 'src/app/models/RegisterUser';
+import { AccountService } from 'src/app/services/account.service';
 
 @Component({
   selector: 'register',
@@ -56,6 +58,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
             mat-raised-button
             color="primary"
             [disabled]="form.invalid"
+            (click)="register()"
           >
             Register
           </button>
@@ -64,11 +67,11 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
     </div>
   `,
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent {
   form: FormGroup;
   hidePassword: boolean;
 
-  constructor() {
+  constructor(private _accountService: AccountService) {
     this.hidePassword = true;
 
     this.form = new FormGroup({
@@ -84,5 +87,20 @@ export class RegisterComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  register() {
+    const user: RegisterUser = {
+      email: this.form.controls['email'].value,
+      userName: this.form.controls['userName'].value,
+      password: this.form.controls['password'].value,
+    };
+
+    this._accountService.register(user).subscribe(
+      (response) => {
+        console.log(response);
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
 }

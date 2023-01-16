@@ -14,11 +14,11 @@ import { User } from 'src/app/models/User';
       <mat-divider></mat-divider>
 
       <mat-list role="list">
-        <div *ngFor="let user of activeUsers; let i = index">
+        <div *ngFor="let username of activeUsers; let i = index">
           <div class="user-list-item">
             <mat-icon style="color: #2af598;">account_circle</mat-icon>
             <mat-list-item role="listitem">
-              {{ user.userName }}
+              {{ username }}
             </mat-list-item>
           </div>
           <mat-divider></mat-divider>
@@ -29,7 +29,7 @@ import { User } from 'src/app/models/User';
 })
 export class ActiveUsersComponent implements OnInit {
   @Input()
-  activeUsers: User[];
+  activeUsers: string[];
 
   constructor() {
     this.activeUsers = [];

@@ -1,7 +1,7 @@
 export interface Message {
   userName: string;
   content: string;
-  date: number;
-  to?: string;
-  groupName?: string;
+  date: string;
+  // to?: string;
+  // groupName?: string;
 }

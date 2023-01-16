@@ -11,82 +11,68 @@ import { User } from 'src/app/models/User';
       <active-users [activeUsers]="activeUsers"></active-users>
       <messages
         [messages]="conversation"
-        [user]="userName"
+        [user]="user.userName"
         (messageSend)="sendMessage($event)"
       ></messages>
     </div>
   `,
 })
 export class ChatComponent implements OnInit {
-  public userName = 'kobura';
-  public groupName = '';
-  public messageToSend = '';
-  public joined = false;
-  public conversation: Message[] = [
-    {
-      content: 'Welcome',
-      userName: 'System',
-      date: Date.now(),
-    },
-    {
-      content: 'Hello!',
-      userName: 'kobura',
-      date: Date.now(),
-    },
-    {
-      content:
-        'Dolor reprehenderit aliquip pariatur magna culpa magna et non veniam anim esse consectetur fugiat. Anim enim tempor enim excepteur commodo nisi sit sint adipisicing esse officia. Enim tempor nostrud esse Lorem. Adipisicing mollit ex et reprehenderit nostrud esse enim dolor ea cupidatat nostrud. Adipisicing consectetur commodo occaecat mollit ut eiusmod cillum deserunt anim fugiat.!',
-      userName: 'kobura',
-      date: Date.now(),
-    },
-    {
-      content:
-        'Est magna culpa sunt laboris qui magna. Labore commodo esse commodo est occaecat elit enim aute fugiat laboris anim consectetur tempor. Anim excepteur dolor excepteur est ex non aliquip pariatur minim occaecat sunt anim sunt sint. Aute cillum minim Lorem deserunt incididunt. Tempor ad voluptate commodo laboris non adipisicing nisi minim eu labore est.',
-      userName: 'System',
-      date: Date.now(),
-    },
-    {
-      content:
-        'Voluptate aute non nulla labore mollit enim nostrud non quis dolor. Nulla enim excepteur consectetur adipisicing cupidatat. Incididunt ea culpa eiusmod sint ut aute nisi pariatur quis velit velit veniam.',
-      userName: 'kobura',
-      date: Date.now(),
-    },
-    {
-      content:
-        'Dolor reprehenderit aliquip pariatur magna culpa magna et non veniam anim esse consectetur fugiat. Anim enim tempor enim excepteur commodo nisi sit sint adipisicing esse officia. Enim tempor nostrud esse Lorem. Adipisicing mollit ex et reprehenderit nostrud esse enim dolor ea cupidatat nostrud. Adipisicing consectetur commodo occaecat mollit ut eiusmod cillum deserunt anim fugiat.!',
-      userName: 'kobura',
-      date: Date.now(),
-    },
-  ];
+  user: User;
+  conversation: Message[];
 
-  activeUsers: User[];
+  activeUsers: string[];
 
-  // private connection: HubConnection;
+  private connection: HubConnection;
 
   constructor() {
-    this.activeUsers = [
-      { email: 'test_user1@email.com', userName: 'test_user1' },
-      { email: 'test_user2@email.com', userName: 'test_user2' },
-      { email: 'test_user3@email.com', userName: 'test_user3' },
-      { email: 'test_user4@email.com', userName: 'test_user4' },
-    ];
-    // this.connection = new HubConnectionBuilder()
-    //   .withUrl('http://localhost:7001')
-    //   .build();
+    this.user = this.getUserInfo();
+    this.conversation = [];
+
+    this.activeUsers = [];
+
+    this.connection = new HubConnectionBuilder()
+      .withUrl('https://localhost:7001/hubs/chat')
+      .build();
+
+    this.connection.on('NewMessage', (message) => this.newMessage(message));
+    this.connection.on('UserConnected', (username) =>
+      this.userConnected(username)
+    );
+    this.connection.on('UserDisconnected', (username) =>
+      this.userDisconnected(username)
+    );
   }
 
   ngOnInit() {
-    // this.connection
-    //   .start()
-    //   .then((_) => {
-    //     console.log('Connection started');
-    //   })
-    //   .catch((error) => {
-    //     return console.error(error);
-    //   });
+    this.connection
+      .start()
+      .then((_) => {
+        console.log('Connection started');
+      })
+      .catch((error) => {
+        return console.error(error);
+      });
+  }
+
+  getUserInfo(): User {
+    const userInfo = JSON.parse(localStorage.getItem('user_info')!);
+    return { email: userInfo.email, userName: userInfo.username };
   }
 
   sendMessage(message: Message) {
+    this.connection.send('SendMessage', JSON.stringify(message));
+  }
+
+  newMessage(message: Message) {
     this.conversation.push(message);
+  }
+
+  userConnected(username: string) {
+    this.activeUsers.push(username);
+  }
+
+  userDisconnected(username: string) {
+    this.activeUsers = this.activeUsers.filter((x) => x != username);
   }
 }

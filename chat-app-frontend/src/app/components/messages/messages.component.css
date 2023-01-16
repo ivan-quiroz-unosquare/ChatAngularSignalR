@@ -9,6 +9,10 @@
   display: flex;
 }
 
+ul {
+  width: 100%;
+}
+
 .send-message-bar {
   height: 15%;
   display: flex;

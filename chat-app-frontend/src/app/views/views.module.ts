@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { ComponentsModule } from '../components/components.module';
 
@@ -14,6 +15,7 @@ import { MatInputModule } from '@angular/material/input';
   imports: [
     ReactiveFormsModule,
     ComponentsModule,
+    HttpClientModule,
     MatFormFieldModule,
     MatInputModule,
   ],
