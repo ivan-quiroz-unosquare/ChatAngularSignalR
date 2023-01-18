@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { RegisterUser } from 'src/app/models/RegisterUser';
 import { AccountService } from 'src/app/services/account.service';
 
@@ -7,6 +9,7 @@ import { AccountService } from 'src/app/services/account.service';
   selector: 'register',
   styleUrls: ['./register.component.css'],
   template: `
+    <navbar [loggedIn]="false"></navbar>
     <div class="container">
       <div class="form-container">
         <form [formGroup]="form">
@@ -40,6 +43,7 @@ import { AccountService } from 'src/app/services/account.service';
               [type]="hidePassword ? 'password' : 'text'"
             />
             <button
+              type="button"
               mat-icon-button
               matSuffix
               (click)="hidePassword = !hidePassword"
@@ -71,7 +75,11 @@ export class RegisterComponent {
   form: FormGroup;
   hidePassword: boolean;
 
-  constructor(private _accountService: AccountService) {
+  constructor(
+    private _accountService: AccountService,
+    private _toastr: ToastrService,
+    private _router: Router
+  ) {
     this.hidePassword = true;
 
     this.form = new FormGroup({
@@ -95,11 +103,12 @@ export class RegisterComponent {
     };
 
     this._accountService.register(user).subscribe(
-      (response) => {
-        console.log(response);
+      () => {
+        this._toastr.success('User registered successfully!');
+        this._router.navigateByUrl('/login');
       },
       (error) => {
-        console.error(error);
+        error.map((message: any) => this._toastr.error(message.description));
       }
     );
   }

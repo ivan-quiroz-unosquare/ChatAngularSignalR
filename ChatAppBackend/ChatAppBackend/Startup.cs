@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Text;
 
 namespace ChatAppBackend
 {
@@ -30,6 +31,18 @@ namespace ChatAppBackend
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtKey"])),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
 
             services.AddAutoMapper(typeof(Startup));
 
@@ -57,6 +70,7 @@ namespace ChatAppBackend
 
             // Add repositories
             services.AddScoped<IAccountRepository, AccountService>();
+            services.AddSingleton<IChatRepository, ChatService>();
 
             // Configure Swagger
             services.AddSwaggerGen(c =>

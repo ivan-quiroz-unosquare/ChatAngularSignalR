@@ -1,4 +1,12 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  AfterViewChecked,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Message } from 'src/app/models/Message';
 
@@ -7,33 +15,28 @@ import { Message } from 'src/app/models/Message';
   styleUrls: ['./messages.component.css'],
   template: `
     <div class="messages">
-      <div
-        class="messages-container"
-        #messagesContainer
-        [scrollTop]="messagesContainer.scrollHeight"
-      >
-        <ul>
+      <div class="messages-container" #messagesContainer>
+        <div
+          #messageContainer
+          *ngFor="let message of messages"
+          class="message-container"
+          [ngClass]="{
+            'message-received-container': user != message.userName,
+            'message-send-container': user == message.userName
+          }"
+        >
+          <p *ngIf="user != message.userName">{{ message.userName + ':' }}</p>
           <div
-            *ngFor="let message of messages"
-            class="message-container"
             [ngClass]="{
-              'message-received-container': user != message.userName,
-              'message-send-container': user == message.userName
+              'message-received': user != message.userName,
+              'message-send': user == message.userName
             }"
+            class="message"
           >
-            <p *ngIf="user != message.userName">{{ message.userName + ':' }}</p>
-            <li
-              [ngClass]="{
-                'message-received': user != message.userName,
-                'message-send': user == message.userName
-              }"
-              class="message"
-            >
-              {{ message.content }}
-            </li>
-            <p>{{ message.date | date : 'medium' }}</p>
+            {{ message.content }}
           </div>
-        </ul>
+          <p>{{ message.date | date : 'medium' }}</p>
+        </div>
       </div>
 
       <div class="send-message-bar">
@@ -50,7 +53,7 @@ import { Message } from 'src/app/models/Message';
     </div>
   `,
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements AfterViewChecked {
   @Input()
   messages: Message[];
   @Input()
@@ -58,6 +61,9 @@ export class MessagesComponent implements OnInit {
 
   @Output()
   messageSend: EventEmitter<Message>;
+
+  @ViewChild('messagesContainer')
+  messagesContainer: ElementRef;
 
   form: FormGroup;
 
@@ -69,9 +75,13 @@ export class MessagesComponent implements OnInit {
     this.form = new FormGroup({
       message: new FormControl(''),
     });
+
+    this.messagesContainer = new ElementRef('');
   }
 
-  ngOnInit() {}
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
 
   sendMessage(content: string) {
     if (content) {
@@ -84,4 +94,13 @@ export class MessagesComponent implements OnInit {
       this.form.controls['message'].setValue('');
     }
   }
+
+  scrollToBottom = () => {
+    try {
+      this.messagesContainer.nativeElement.scrollTo(
+        0,
+        this.messagesContainer.nativeElement.scrollHeight
+      );
+    } catch (err) {}
+  };
 }

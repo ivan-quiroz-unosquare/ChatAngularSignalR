@@ -5,18 +5,23 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
+import { Store, select } from '@ngrx/store';
+import { AppState } from '../state/app.state';
+import { selectLoggedIn } from '../state/user/user.selector';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class IsLoggedInGuard implements CanActivate {
-  constructor(private _router: Router) {}
+  constructor(private _router: Router, private _store: Store<AppState>) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    const hasSession = localStorage.getItem('user_info');
-    if (!hasSession) {
-      this._router.navigateByUrl('/login');
-      return false;
-    }
+    let isLoggedIn: boolean = false;
+    this._store
+      .select((state) => state.userState.loggedIn)
+      .subscribe((response) => (isLoggedIn = response));
 
-    return true;
+    if (!isLoggedIn) this._router.navigateByUrl('/login');
+
+    return isLoggedIn;
   }
 }

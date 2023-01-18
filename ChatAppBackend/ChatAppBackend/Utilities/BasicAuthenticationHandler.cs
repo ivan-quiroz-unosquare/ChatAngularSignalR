@@ -21,16 +21,19 @@ namespace ChatAppBackend.Utilities
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            string email = null;
+            if (!Request.Headers.ContainsKey("Authorization"))
+                return AuthenticateResult.Fail("Invalid credentials");
+
+            string username = null;
 
             try
             {
                 var authenticationHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
                 var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(authenticationHeader.Parameter)).Split(':');
-                email = credentials.FirstOrDefault();
+                username = credentials.FirstOrDefault();
                 var password = credentials.LastOrDefault();
 
-                if (email != "ivan.quiroz@email.com" && password != "Perrito1q.")
+                if (username != "ivan.quiroz@email.com" && password != "Perrito1q.")
                     throw new ArgumentException("Invalid credentials");
             }
             catch (Exception ex)
@@ -40,7 +43,7 @@ namespace ChatAppBackend.Utilities
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, email),
+                new Claim(ClaimTypes.Name, username),
             };
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);

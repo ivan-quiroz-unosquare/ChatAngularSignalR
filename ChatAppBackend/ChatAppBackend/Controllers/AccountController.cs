@@ -35,9 +35,10 @@ namespace ChatAppBackend.Controllers
 
         [HttpDelete]
         [Route("[action]")]
-        public async Task<IActionResult> Logout([FromHeader] string username)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Logout()
         {
-            return await _accountRepository.Logout(username);
+            return await _accountRepository.Logout(HttpContext);
         }
 
         [HttpGet]

@@ -22,9 +22,7 @@ export class AccountService {
       .post(`${this.baseUrl}/api/Account/Register`, newUser)
       .pipe(
         map((response: any) => response),
-        catchError((error: HttpErrorResponse) =>
-          throwError(() => error.message)
-        )
+        catchError((error: HttpErrorResponse) => throwError(() => error.error))
       );
   }
 
@@ -33,37 +31,22 @@ export class AccountService {
       .get(`${this.baseUrl}/api/Account/Login`, {
         headers: new HttpHeaders({ Authorization: `Basic ${authorization}` }),
       })
-      .pipe(
-        map((response: any) => response),
-        catchError((error: HttpErrorResponse) =>
-          throwError(() => error.message)
-        )
-      );
+      .pipe(map((response: any) => response));
   }
 
-  logout(username: string) {
+  logout(token: string) {
     return this._http
       .delete(`${this.baseUrl}/api/Account/Logout`, {
-        headers: new HttpHeaders({ username }),
+        headers: new HttpHeaders({ Authorization: token }),
       })
-      .pipe(
-        map((response: any) => response),
-        catchError((error: HttpErrorResponse) =>
-          throwError(() => error.message)
-        )
-      );
+      .pipe(map((response: any) => response));
   }
 
   refreshToken(token: string): Observable<AuthenticationResponse> {
     return this._http
       .get(`${this.baseUrl}/api/Account/RefreshToken`, {
-        headers: new HttpHeaders({ Authentication: token }),
+        headers: new HttpHeaders({ Authorization: token }),
       })
-      .pipe(
-        map((response: any) => response),
-        catchError((error: HttpErrorResponse) =>
-          throwError(() => error.message)
-        )
-      );
+      .pipe(map((response: any) => response));
   }
 }

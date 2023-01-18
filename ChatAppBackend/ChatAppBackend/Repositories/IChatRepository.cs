@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ChatAppBackend.Entities;
 
 namespace ChatAppBackend.Repositories
 {
     public interface IChatRepository
     {
-        Task<IActionResult> GetMessages();
-        Task<IActionResult> SendMessage();
+        List<MessageDTO> GetMessages();
+        Task SendMessage(MessageDTO message);
+        Task GetActiveUsers();
+        Task UserConnected(string username);
+        Task UserDisconnected(string username);
     }
 }

@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AccountService } from 'src/app/services/account.service';
-import jwt_decode from 'jwt-decode';
-import { AuthenticationResponse } from 'src/app/models/AuthenticationResponse';
 import { Router } from '@angular/router';
+import { AppState } from 'src/app/state/app.state';
+import { Store } from '@ngrx/store';
+import { login } from 'src/app/state/user/user.action';
 
 @Component({
   selector: 'login',
   styleUrls: ['./login.component.css'],
   template: `
+    <navbar [loggedIn]="false"></navbar>
     <div class="container">
       <div class="form-container">
         <form [formGroup]="form">
@@ -68,7 +70,8 @@ export class LoginComponent {
 
   constructor(
     private _accountService: AccountService,
-    private _router: Router
+    private _router: Router,
+    private _store: Store<AppState>
   ) {
     this.hidePassword = true;
 
@@ -79,15 +82,6 @@ export class LoginComponent {
   }
 
   login(username: string, password: string) {
-    this._accountService.login(btoa(`${username}:${password}`)).subscribe(
-      (response: AuthenticationResponse) => {
-        const userInfo = jwt_decode(response.token);
-        localStorage.setItem('user_info', JSON.stringify(userInfo));
-        this._router.navigateByUrl('/');
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+    this._store.dispatch(login({ auth: btoa(`${username}:${password}`) }));
   }
 }

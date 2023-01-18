@@ -16,17 +16,17 @@ namespace ChatAppBackend.Services
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
-        private readonly IHubContext<ChatHub> _chatHubContext;
+        private readonly IChatRepository _chatRepository;
 
         public AccountService(UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             IConfiguration configuration,
-            IHubContext<ChatHub> chatHubContext)
+            IChatRepository chatRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
-            _chatHubContext = chatHubContext;
+            _chatRepository = chatRepository;
         }
 
         public async Task<IActionResult> Register(RegisterUser user)
@@ -50,34 +50,33 @@ namespace ChatAppBackend.Services
             var credentials = Encoding.UTF8.GetString(
                 Convert.FromBase64String(authentication.Replace("Basic ", "")))
                 .Split(':');
-            var userName = credentials.FirstOrDefault();
+            var username = credentials.FirstOrDefault();
             var password = credentials.LastOrDefault();
 
-            var result = await _signInManager.PasswordSignInAsync(userName, password,
+            var result = await _signInManager.PasswordSignInAsync(username, password,
                 isPersistent: false, lockoutOnFailure: false);
 
             if (!result.Succeeded) return new UnauthorizedObjectResult("Incorrect login!");
 
-            await _chatHubContext.Clients.All.SendAsync("UserConnected", userName);
+            await _chatRepository.UserConnected(username);
+            await _chatRepository.GetActiveUsers();
 
-            return new OkObjectResult(await GetToken(new UserCredentials { UserName = userName }));
+            return new OkObjectResult(await GetToken(new UserCredentials { UserName = username }));
         }
 
-        public async Task<IActionResult> Logout(string username)
+        public async Task<IActionResult> Logout(HttpContext httpContext)
         {
-            //var username = httpContext.User.Claims.Where(claim => claim.Type.Equals("username")).FirstOrDefault()?.Value;
-
-            await _chatHubContext.Clients.All.SendAsync("UserDisconnected", username);
-
+            var username = httpContext.User.Claims.Where(claim => claim.Type.Equals("username")).FirstOrDefault()?.Value;
+            await _chatRepository.UserDisconnected(username);
             return new NoContentResult();
         }
 
         public async Task<IActionResult> RefreshToken(HttpContext httpContext)
         {
-            var email = httpContext.User.Claims.Where(claim => claim.Type.Equals("email")).FirstOrDefault()?.Value;
+            var username = httpContext.User.Claims.Where(claim => claim.Type.Equals("username")).FirstOrDefault()?.Value;
             var userCredentials = new UserCredentials
             {
-                UserName = email,
+                UserName = username,
             };
 
             return new OkObjectResult(await GetToken(userCredentials));

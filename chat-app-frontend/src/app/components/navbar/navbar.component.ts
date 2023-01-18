@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { User } from 'src/app/models/User';
 import { AccountService } from 'src/app/services/account.service';
+import { AppState } from 'src/app/state/app.state';
+import { UserActions } from 'src/app/state/user/action-types';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'navbar',
@@ -50,48 +54,37 @@ import { AccountService } from 'src/app/services/account.service';
   `,
 })
 export class NavbarComponent implements OnInit {
+  @Input()
   loggedIn: boolean;
   user: User;
 
   constructor(
     private _router: Router,
-    private _accountService: AccountService
+    private _accountService: AccountService,
+    private _store: Store<AppState>
   ) {
-    this.loggedIn = this.isLoggedIn();
-    this.user = this.getUserInfo();
+    this.loggedIn = false;
+    this.user = { userName: '', email: '' };
   }
 
   ngOnInit() {
-    setInterval(() => {
-      this.loggedIn = this.isLoggedIn();
-    }, 300);
+    if (this.loggedIn) {
+      this._store
+        .select((state) => state.userState.user)
+        .subscribe((user) => (this.user = user!));
+    }
   }
 
   logout() {
-    this._accountService.logout(this.user.userName).subscribe(
-      (response) => {
-        this.loggedIn = false;
-        localStorage.removeItem('user_info');
-        this._router.navigateByUrl('/login');
-      },
-      (error) => {
-        console.error(error);
-      }
+    let token = '';
+    this._store
+      .select((store) => store.userState.auth)
+      .subscribe((auth) => (token = auth!.token));
+
+    this._store.dispatch(
+      UserActions.logout({
+        token,
+      })
     );
-  }
-
-  isLoggedIn(): boolean {
-    const hasSession = localStorage.getItem('user_info');
-    if (hasSession) return true;
-    return false;
-  }
-
-  getUserInfo(): User {
-    if (this.isLoggedIn()) {
-      const userInfo = JSON.parse(localStorage.getItem('user_info')!);
-      return { email: userInfo.email, userName: userInfo.username };
-    }
-
-    return { email: '', userName: '' };
   }
 }
